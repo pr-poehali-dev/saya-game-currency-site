@@ -294,7 +294,7 @@ export default function Index() {
                 <CardTitle>Email</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">support@saya.game</p>
+                <p className="text-muted-foreground">gogleplaydonat1@gmail.com</p>
               </CardContent>
             </Card>
             <Card className="text-center">
@@ -305,7 +305,7 @@ export default function Index() {
                 <CardTitle>Telegram</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">@saya_support</p>
+                <p className="text-muted-foreground">@SayaGAMeOFFICIAL</p>
               </CardContent>
             </Card>
             <Card className="text-center">
@@ -316,7 +316,7 @@ export default function Index() {
                 <CardTitle>Сайт</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">saya.game</p>
+                <p className="text-muted-foreground">saya.chat</p>
               </CardContent>
             </Card>
           </div>
