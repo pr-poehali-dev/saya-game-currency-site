@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
 
 const packages = [
   { price: 450, coins: '500', popular: false },
@@ -38,10 +43,43 @@ const faqItems = [
 
 export default function Index() {
   const [activeSection, setActiveSection] = useState('packages');
+  const [selectedPackage, setSelectedPackage] = useState<typeof packages[0] | null>(null);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [email, setEmail] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const scrollToSection = (section: string) => {
     setActiveSection(section);
     document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleBuyClick = (pkg: typeof packages[0]) => {
+    setSelectedPackage(pkg);
+    setIsPaymentOpen(true);
+  };
+
+  const handlePayment = () => {
+    if (!email) {
+      toast({
+        title: 'Ошибка',
+        description: 'Укажите email для получения чека',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setIsPaymentOpen(false);
+      toast({
+        title: 'Оплата прошла успешно! 🎉',
+        description: `${selectedPackage?.coins} монет зачислены на ваш счёт`,
+      });
+      setEmail('');
+    }, 2000);
   };
 
   return (
@@ -154,6 +192,7 @@ export default function Index() {
                 </CardContent>
                 <CardFooter>
                   <Button
+                    onClick={() => handleBuyClick(pkg)}
                     className={`w-full font-semibold ${
                       pkg.popular ? 'bg-gradient-gaming hover:opacity-90' : ''
                     }`}
@@ -289,6 +328,91 @@ export default function Index() {
           <p>© 2024 Saya. Games & Party & Chat. Все права защищены.</p>
         </div>
       </footer>
+
+      <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Оформление покупки</DialogTitle>
+            <DialogDescription>
+              Вы покупаете {selectedPackage?.coins} монет за {selectedPackage?.price} ₽
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="bg-card p-4 rounded-lg border border-border">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-muted-foreground">Монеты:</span>
+                <span className="font-bold text-lg">{selectedPackage?.coins}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">К оплате:</span>
+                <span className="font-bold text-2xl bg-gradient-gaming bg-clip-text text-transparent">
+                  {selectedPackage?.price} ₽
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email для чека</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@mail.ru"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label>Способ оплаты</Label>
+              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                <div className="flex items-center space-x-3 border border-border rounded-lg p-3 hover:border-primary transition-colors cursor-pointer">
+                  <RadioGroupItem value="card" id="card" />
+                  <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer flex-1">
+                    <Icon name="CreditCard" size={20} className="text-primary" />
+                    <span>Банковская карта</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3 border border-border rounded-lg p-3 hover:border-primary transition-colors cursor-pointer">
+                  <RadioGroupItem value="sbp" id="sbp" />
+                  <Label htmlFor="sbp" className="flex items-center gap-2 cursor-pointer flex-1">
+                    <Icon name="Smartphone" size={20} className="text-primary" />
+                    <span>СБП (Система быстрых платежей)</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3 border border-border rounded-lg p-3 hover:border-primary transition-colors cursor-pointer">
+                  <RadioGroupItem value="qiwi" id="qiwi" />
+                  <Label htmlFor="qiwi" className="flex items-center gap-2 cursor-pointer flex-1">
+                    <Icon name="Wallet" size={20} className="text-primary" />
+                    <span>QIWI Кошелёк</span>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <Button
+              onClick={handlePayment}
+              disabled={isProcessing}
+              className="w-full bg-gradient-gaming hover:opacity-90 font-semibold text-lg h-12"
+            >
+              {isProcessing ? (
+                <>
+                  <Icon name="Loader2" size={20} className="mr-2 animate-spin" />
+                  Обработка...
+                </>
+              ) : (
+                <>
+                  <Icon name="ShoppingCart" size={20} className="mr-2" />
+                  Оплатить {selectedPackage?.price} ₽
+                </>
+              )}
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center">
+              Нажимая кнопку оплаты, вы соглашаетесь с условиями использования сервиса
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
